@@ -1,0 +1,41 @@
+
+{
+  "name": "react-native-compose",
+  "version": "0.0.1",
+  "description": "Compose text messages and emails from within React Native apps",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "install-ios": "pushd ios; pod install; popd"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/fjcaetano/react-native-compose.git"
+  },
+  "keywords": [
+    "react-native",
+    "react",
+    "native",
+    "compose",
+    "text",
+    "sms",
+    "message",
+    "email",
+    "MFMessageComposeViewController",
+    "MFMailComposeViewController",
+    "ios",
+    "intent",
+    "android"
+  ],
+  "author": "Flávio Caetano",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/fjcaetano/react-native-compose/issues"
+  },
+  "homepage": "https://github.com/fjcaetano/react-native-compose",
+  "peerDependencies": {
+    "react-native": "^0.41.2",
+    "react-native-windows": "0.41.0-rc.1"
+
+  }
+}
