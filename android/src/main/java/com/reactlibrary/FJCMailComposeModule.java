@@ -38,6 +38,7 @@ public class FJCMailComposeModule extends ReactContextBaseJavaModule {
     private static final int ACTIVITY_SEND = 129382;
 
     private Promise mPromise;
+    private Intent intent = new Intent(Intent.ACTION_SEND_MULTIPLE);
 
     private final ActivityEventListener mActivityEventListener = new BaseActivityEventListener() {
 
@@ -290,38 +291,51 @@ public class FJCMailComposeModule extends ReactContextBaseJavaModule {
             mPromise = null;
         }
 
-        Intent intent = new Intent(Intent.ACTION_SEND_MULTIPLE);
-
         String text = getString(data, "body");
         String html = getString(data, "html");
         if (!isEmpty(html)) {
-            intent.setType("text/html");
-            putExtra(intent, Intent.EXTRA_TEXT, Html.fromHtml(html));
-            putExtra(intent, Intent.EXTRA_HTML_TEXT, Html.fromHtml(html));
+            this.intent.setType("text/html");
+            putExtra(this.intent, Intent.EXTRA_TEXT, Html.fromHtml(html));
+            putExtra(this.intent, Intent.EXTRA_HTML_TEXT, Html.fromHtml(html));
         } else {
-            intent.setType("text/plain");
+            this.intent.setType("text/plain");
             if (!isEmpty(text)) {
-                putExtra(intent, Intent.EXTRA_TEXT, text);
+                putExtra(this.intent, Intent.EXTRA_TEXT, text);
             }
         }
 
-        putExtra(intent, Intent.EXTRA_SUBJECT, getString(data, "subject"));
-        putExtra(intent, Intent.EXTRA_EMAIL, getStringArray(data, "toRecipients"));
-        putExtra(intent, Intent.EXTRA_CC, getStringArray(data, "ccRecipients"));
-        putExtra(intent, Intent.EXTRA_BCC, getStringArray(data, "bccRecipients"));
-        addAttachments(intent, getArray(data, "attachments"));
+        putExtra(this.intent, Intent.EXTRA_SUBJECT, getString(data, "subject"));
+        putExtra(this.intent, Intent.EXTRA_EMAIL, getStringArray(data, "toRecipients"));
+        putExtra(this.intent, Intent.EXTRA_CC, getStringArray(data, "ccRecipients"));
+        putExtra(this.intent, Intent.EXTRA_BCC, getStringArray(data, "bccRecipients"));
+        addAttachments(this.intent, getArray(data, "attachments"));
 
-        intent.putExtra("exit_on_sent", true);
-        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+        this.intent.putExtra("exit_on_sent", true);
+        this.intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        this.intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
 
         try {
-            getCurrentActivity().startActivityForResult(Intent.createChooser(intent, "Send Mail"), ACTIVITY_SEND);
+            getCurrentActivity().startActivityForResult(Intent.createChooser(this.intent, "Send Mail"), ACTIVITY_SEND);
             mPromise = promise;
         } catch (ActivityNotFoundException e) {
             promise.reject("failed", "Activity Not Found");
         } catch (Exception e) {
             promise.reject("failed", "Unknown Error");
         }
+    }
+
+    @ReactMethod
+    public void canSendMail(Promise promise) {
+        promise.resolve(this.intent.resolveActivity(getCurrentActivity().getPackageManager()) == null);
+    }
+
+    @ReactMethod
+    public void canSendAttachments(Promise promise) {
+        promise.resolve(true);
+    }
+
+    @ReactMethod
+    public void canSendSubject(Promise promise) {
+        promise.resolve(true);
     }
 }

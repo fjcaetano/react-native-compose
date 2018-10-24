@@ -161,8 +161,6 @@ public class FJCMessageComposeModule extends ReactContextBaseJavaModule {
         }
 
         Intent intent = new Intent(Intent.ACTION_SENDTO, Uri.parse("smsto:" + address));
-        // intent.setPackage("com.android.mms");
-        // intent.setClassName("com.android.mms", "com.android.mms.ui.ComposeMessageActivity");
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
             String defaultSmsPackageName = Telephony.Sms.getDefaultSmsPackage(getCurrentActivity());
@@ -170,9 +168,6 @@ public class FJCMessageComposeModule extends ReactContextBaseJavaModule {
                 intent.setPackage(defaultSmsPackageName);
             }
         }
-
-        // intent.setType("vnd.android-dir/mms-sms");
-        // intent.setData(Uri.parse("mms:" + address));
 
         putExtra(intent, "address", address);
         putExtra(intent, "subject", getString(data, "subject"));
@@ -182,51 +177,6 @@ public class FJCMessageComposeModule extends ReactContextBaseJavaModule {
         intent.putExtra("exit_on_sent", true);
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 
-
-        /*
-        ReadableMap attachment = getMap(data, "attachment");
-        if (attachment != null) {
-            byte[] blob = getBlob(attachment, "data");
-            String text = getString(attachment, "text");
-            String mimeType = getString(attachment, "mimeType");
-            String filename = getString(attachment, "filename");
-            if (filename == null) {
-                filename = UUID.randomUUID().toString();
-            }
-            String ext = getString(attachment, "ext");
-
-            try {
-                File tempFile = File.createTempFile(filename, ext, getCurrentActivity().getBaseContext().getCacheDir());
-
-                if (text != null) {
-                    BufferedWriter bw = new BufferedWriter(new FileWriter(tempFile.getAbsoluteFile()));
-                    try {
-                        bw.write(text);
-                        bw.flush();
-                    } finally {
-                        bw.close();
-                    }
-                } else if (blob != null) {
-                    FileOutputStream fo = new FileOutputStream(tempFile);
-                    try {
-                        fo.write(blob);
-                        fo.flush();
-                    } finally {
-                        fo.close();
-                    }
-                }
-
-                intent.putExtra(Intent.EXTRA_STREAM, Uri.fromFile(tempFile));
-                if (mimeType != null) {
-                    intent.setType(mimeType);
-                }
-            } catch (Exception e) {
-                // do nothing
-            }
-        }
-        */
-
-
         try {
             getCurrentActivity().startActivityForResult(intent, ACTIVITY_SEND);
             mPromise = promise;
@@ -235,5 +185,11 @@ public class FJCMessageComposeModule extends ReactContextBaseJavaModule {
         } catch (Exception e) {
             promise.reject("failed", "Unknown Error");
         }
+    }
+
+    @ReactMethod
+    public void canSendText(Promise promise) {
+        Intent intent = new Intent(Intent.ACTION_SENDTO);
+        promise.resolve(intent.resolveActivity(getCurrentActivity().getPackageManager()) == null);
     }
 }

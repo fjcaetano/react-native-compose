@@ -2,8 +2,7 @@ import React from 'react';
 
 import { NativeModules } from 'react-native';
 
-const FJCComposeMessage = NativeModules.FJCMessageCompose;
-const FJCComposeMail = NativeModules.FJCMailCompose;
+const { FJCMessageCompose, FJCMailCompose } = NativeModules;
 
 export const ComposeResult = {
   sent: 'sent',
@@ -11,29 +10,20 @@ export const ComposeResult = {
 };
 
 export const ComposeMessage = {
-  canSendText() {
-    return FJCComposeMessage.canSendText();
-  },
-
-  canSendAttachments() {
-    return FJCComposeMessage.canSendAttachments();
-  },
-
-  canSendSubject() {
-    return FJCComposeMessage.canSendSubject();
-  },
-
   send(body) {
-    return FJCComposeMessage.send(body);
+    return FJCMessageCompose.send(body);
   },
 };
 
 export const ComposeMail = {
-  canSendMail() {
-    return FJCComposeMail.canSendMail();
-  },
-
   send(body) {
-    return FJCComposeMail.send(body);
+    return FJCMailCompose.send(body);
   },
 };
+
+(async function() {
+  ComposeMail.canSendMail = await FJCMailCompose.canSendMail();
+  ComposeMessage.canSendText = await FJCMessageCompose.canSendText();
+  ComposeMessage.canSendAttachments = await FJCMessageCompose.canSendAttachments();
+  ComposeMessage.canSendSubject = await FJCMessageCompose.canSendSubject();
+}());
