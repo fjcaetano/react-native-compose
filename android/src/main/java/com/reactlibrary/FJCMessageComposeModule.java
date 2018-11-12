@@ -192,4 +192,14 @@ public class FJCMessageComposeModule extends ReactContextBaseJavaModule {
         Intent intent = new Intent(Intent.ACTION_SENDTO);
         promise.resolve(intent.resolveActivity(getCurrentActivity().getPackageManager()) == null);
     }
+
+    @ReactMethod
+    public void canSendAttachments(Promise promise) {
+        promise.resolve(true);
+    }
+
+    @ReactMethod
+    public void canSendSubject(Promise promise) {
+        promise.resolve(true);
+    }
 }

@@ -328,14 +328,4 @@ public class FJCMailComposeModule extends ReactContextBaseJavaModule {
     public void canSendMail(Promise promise) {
         promise.resolve(this.intent.resolveActivity(getCurrentActivity().getPackageManager()) == null);
     }
-
-    @ReactMethod
-    public void canSendAttachments(Promise promise) {
-        promise.resolve(true);
-    }
-
-    @ReactMethod
-    public void canSendSubject(Promise promise) {
-        promise.resolve(true);
-    }
 }
