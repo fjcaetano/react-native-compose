@@ -2,6 +2,7 @@ package com.reactlibrary;
 
 import android.app.Activity;
 import android.content.ActivityNotFoundException;
+import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
@@ -98,7 +99,7 @@ public class FJCMailComposeModule extends ReactContextBaseJavaModule {
         }
     }
 
-    private void addAttachments(Intent intent, ReadableArray attachments) {
+    private void addAttachments(Intent intent, ReadableArray attachments, Context context) {
         if (attachments == null) return;
 
         ArrayList<Uri> uris = new ArrayList<>();
@@ -115,7 +116,7 @@ public class FJCMailComposeModule extends ReactContextBaseJavaModule {
                     }
                     String ext = getString(attachment, "ext");
 
-                    File tempFile = createTempFile(filename, ext);
+                    File tempFile = createTempFile(filename, ext, context);
 
                     if (blob != null) {
                         tempFile = writeBlob(tempFile, blob);
@@ -232,10 +233,10 @@ public class FJCMailComposeModule extends ReactContextBaseJavaModule {
         return null;
     }
 
-    private File createTempFile(String filename, String ext) {
+    private File createTempFile(String filename, String ext, Context context) {
         if (filename != null && ext != null) {
             try {
-                return File.createTempFile(filename, ext, getCurrentActivity().getBaseContext().getExternalCacheDir());
+                return File.createTempFile(filename, ext, context.getExternalCacheDir());
             } catch (IOException e1) {
             }
         }
@@ -291,6 +292,12 @@ public class FJCMailComposeModule extends ReactContextBaseJavaModule {
             mPromise = null;
         }
 
+        Activity activity = getCurrentActivity();
+        if (activity == null) {
+            promise.reject("failed", "Activitiy is null");
+            return;
+        }
+
         String text = getString(data, "body");
         String html = getString(data, "html");
         if (!isEmpty(html)) {
@@ -308,14 +315,14 @@ public class FJCMailComposeModule extends ReactContextBaseJavaModule {
         putExtra(this.intent, Intent.EXTRA_EMAIL, getStringArray(data, "toRecipients"));
         putExtra(this.intent, Intent.EXTRA_CC, getStringArray(data, "ccRecipients"));
         putExtra(this.intent, Intent.EXTRA_BCC, getStringArray(data, "bccRecipients"));
-        addAttachments(this.intent, getArray(data, "attachments"));
+        addAttachments(this.intent, getArray(data, "attachments"), activity.getBaseContext());
 
         this.intent.putExtra("exit_on_sent", true);
         this.intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         this.intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
 
         try {
-            getCurrentActivity().startActivityForResult(Intent.createChooser(this.intent, "Send Mail"), ACTIVITY_SEND);
+            activity.startActivityForResult(Intent.createChooser(this.intent, "Send Mail"), ACTIVITY_SEND);
             mPromise = promise;
         } catch (ActivityNotFoundException e) {
             promise.reject("failed", "Activity Not Found");
@@ -326,6 +333,11 @@ public class FJCMailComposeModule extends ReactContextBaseJavaModule {
 
     @ReactMethod
     public void canSendMail(Promise promise) {
-        promise.resolve(this.intent.resolveActivity(getCurrentActivity().getPackageManager()) == null);
+        Activity activity = getCurrentActivity();
+        if (activity == null) {
+            promise.reject("failed", "Activitiy is null");
+            return;
+        }
+        promise.resolve(this.intent.resolveActivity(activity.getPackageManager()) == null);
     }
 }
