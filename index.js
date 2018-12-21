@@ -22,8 +22,16 @@ export const ComposeMail = {
 };
 
 (async function() {
-  ComposeMail.canSendMail = await FJCMailCompose.canSendMail();
-  ComposeMessage.canSendText = await FJCMessageCompose.canSendText();
+  try {
+    ComposeMail.canSendMail = await FJCMailCompose.canSendMail();
+  } catch (err) {
+    ComposeMail.canSendMail = false;
+  }
+  try {
+    ComposeMessage.canSendText = await FJCMessageCompose.canSendText();
+  } catch (err) {
+    ComposeMessage.canSendText = false;
+  }
   ComposeMessage.canSendAttachments = await FJCMessageCompose.canSendAttachments();
   ComposeMessage.canSendSubject = await FJCMessageCompose.canSendSubject();
 }());

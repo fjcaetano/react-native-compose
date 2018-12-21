@@ -151,6 +151,12 @@ public class FJCMessageComposeModule extends ReactContextBaseJavaModule {
             mPromise = null;
         }
 
+        Activity activity = getCurrentActivity();
+        if (activity == null) {
+            promise.reject("failed", "Activitiy is null");
+            return;
+        }
+
         String address = getString(data, "address");
         if (address != null && Build.MANUFACTURER.equalsIgnoreCase("Samsung")) {
             // http://stackoverflow.com/a/18975676/692528
@@ -163,7 +169,7 @@ public class FJCMessageComposeModule extends ReactContextBaseJavaModule {
         Intent intent = new Intent(Intent.ACTION_SENDTO, Uri.parse("smsto:" + address));
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
-            String defaultSmsPackageName = Telephony.Sms.getDefaultSmsPackage(getCurrentActivity());
+            String defaultSmsPackageName = Telephony.Sms.getDefaultSmsPackage(activity);
             if (defaultSmsPackageName != null) {
                 intent.setPackage(defaultSmsPackageName);
             }
@@ -178,7 +184,7 @@ public class FJCMessageComposeModule extends ReactContextBaseJavaModule {
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 
         try {
-            getCurrentActivity().startActivityForResult(intent, ACTIVITY_SEND);
+            activity.startActivityForResult(intent, ACTIVITY_SEND);
             mPromise = promise;
         } catch (ActivityNotFoundException e) {
             promise.reject("failed", "Activity not found");
@@ -190,7 +196,12 @@ public class FJCMessageComposeModule extends ReactContextBaseJavaModule {
     @ReactMethod
     public void canSendText(Promise promise) {
         Intent intent = new Intent(Intent.ACTION_SENDTO);
-        promise.resolve(intent.resolveActivity(getCurrentActivity().getPackageManager()) == null);
+        Activity activity = getCurrentActivity();
+        if (activity == null) {
+            promise.reject("failed", "Activitiy is null");
+            return;
+        }
+        promise.resolve(intent.resolveActivity(activity.getPackageManager()) == null);
     }
 
     @ReactMethod
